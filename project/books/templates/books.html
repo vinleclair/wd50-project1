@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block content %}
+ 
+<div class="page-header">
+  <h2>Books</h2>
+</div>
+<div class="row">
+  <div class="col-md-4">
+    <table class="table table-striped" id="owned_stock_table">
+      <thead>
+        <tr>
+          <th>ISBN</th>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Year</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for book in books %}
+        <tr>
+          <td>{{ book.isbn }}</td>
+          <td>{{ book.title }}</td>
+          <td>{{ book.author }}</td>
+          <td>{{ book.year }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+ 
+{% endblock %}

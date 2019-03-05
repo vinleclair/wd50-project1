@@ -24,9 +24,10 @@ class ProjectTests(unittest.TestCase):
     def test_main_page(self):
         response = self.app.get('/', follow_redirects=True)
         self.assertIn(b'Book Reviews', response.data)
-        self.assertIn(b'This site enables users to search and review books!', response.data)
         self.assertIn(b'Search', response.data)
         self.assertIn(b'Books', response.data)
+        self.assertIn(b'Book Reviews', response.data)
+        self.assertIn(b'Goodreads', response.data)
 
 
 if __name__ == "__main__":
