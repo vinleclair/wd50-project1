@@ -19,9 +19,6 @@ class ProjectTests(unittest.TestCase):
     def tearDown(self):
         pass
 
-
-    # helper methods
-
     # tests
 
     def test_main_page(self):
