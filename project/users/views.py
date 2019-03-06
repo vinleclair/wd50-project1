@@ -29,7 +29,7 @@ def register():
     if request.method == 'POST':
         if form.validate_on_submit():
             try:
-                new_user = User(form.username.data, form.password.data)
+                new_user = User(form.email.data, form.password.data)
                 new_user.authenticated = True
                 db.session.add(new_user)
                 db.session.commit()
@@ -37,7 +37,7 @@ def register():
                 return redirect(url_for('books.index'))
             except IntegrityError:
                 db.session.rollback()
-                flash('ERROR! Username ({}) already exists.'.format(form.username.data), 'error')
+                flash('ERROR! Username ({}) already exists.'.format(form.email.data), 'error')
     return render_template('register.html', form=form)
 
 @users_blueprint.route('/login', methods=['GET', 'POST'])
@@ -45,13 +45,13 @@ def login():
     form = LoginForm(request.form)
     if request.method == 'POST':
         if form.validate_on_submit():
-            user = User.query.filter_by(username=form.username.data).first()
+            user = User.query.filter_by(email=form.email.data).first()
             if user is not None and user.is_correct_password(form.password.data):
                 user.authenticated = True
                 db.session.add(user)
                 db.session.commit()
                 login_user(user)
-                flash('Thanks for logging in, {}'.format(current_user.username))
+                flash('Thanks for logging in, {}'.format(current_user.email))
                 return redirect(url_for('books.index'))
             else:
                 flash('ERROR! Incorrect login credentials.', 'error')

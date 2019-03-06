@@ -27,12 +27,12 @@ class User(db.Model):
     __tablename__ = 'users'
 
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String, unique=True, nullable=False)
+    email = db.Column(db.String, unique=True, nullable=False)
     _password = db.Column(db.Binary(60), nullable=False)
     authenticated = db.Column(db.Boolean, default=False)
 
-    def __init__(self, username, plaintext_password):
-        self.username = username
+    def __init__(self, email, plaintext_password):
+        self.email = email
         self.password = plaintext_password
         self.authenticated = False
 
