@@ -1,5 +1,5 @@
-from project import db
-from sqlalchemy.ext.hybrid import hybrid_method
+from project import db, bcrypt
+from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 
 
 class Book(db.Model):
@@ -28,17 +28,25 @@ class User(db.Model):
 
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String, unique=True, nullable=False)
-    password = db.Column(db.String, nullable=False)
+    _password = db.Column(db.Binary(60), nullable=False)
     authenticated = db.Column(db.Boolean, default=False)
 
-    def __init__(self, username, password):
+    def __init__(self, username, plaintext_password):
         self.username = username
-        self.password = password
+        self.password = plaintext_password
         self.authenticated = False
 
+    @hybrid_property
+    def password(self):
+        return self._password
+
+    @password.setter
+    def password(self, plaintext_password):
+        self._password = bcrypt.generate_password_hash(plaintext_password)
+
     @hybrid_method
-    def is_correct_password(self, password):
-        return self.password == password
+    def is_correct_password(self, plaintext_password):
+        return bcrypt.check_password_hash(self.password, plaintext_password)
 
     @property
     def is_authenticated(self):
