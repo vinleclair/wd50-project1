@@ -29,12 +29,25 @@ class UsersTests(unittest.TestCase):
         db.session.remove()
         db.drop_all()
 
-    # tests
+    # helper functions
     def register(self, username, password, confirm):
         return self.app.post(
-        '/register',
-        data=dict(username=username, password=password, confirm=confirm),
-        follow_redirects=True)
+                '/register',
+                data=dict(username=username, password=password, confirm=confirm),
+                follow_redirects=True)
+
+    def login(self, username, password):
+        return self.app.post(
+                '/login',
+                data=dict(username=username, password=password),
+                follow_redirects=True)
+
+    # tests
+    def test_main_page(self):
+        response = self.app.get('/', follow_redirects=True)
+        self.assertIn(b'Book Reviews', response.data)
+        self.assertIn(b'Register', response.data)
+        self.assertIn(b'Log In', response.data)
 
     def test_user_registration_form_displays(self):
         response = self.app.get('/register')
@@ -57,6 +70,36 @@ class UsersTests(unittest.TestCase):
         self.app.get('/register', follow_redirects=True)
         response = self.register('vinleclair', 'FlaskIsAwesome', '')
         self.assertIn(b'This field is required.', response.data)
+ 
+    def test_login_form_displays(self):
+        response = self.app.get('/login')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Log In', response.data)
+
+    def test_valid_login(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('vinleclair', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.app.get('/login', follow_redirects=True)
+        response = self.login('vinleclair', 'FlaskIsAwesome')
+        self.assertIn(b'Welcome, vinleclair!', response.data)
+
+    def test_login_without_registering(self):
+        self.app.get('/login', follow_redirects=True)
+        response = self.login('vinleclair', 'FlaskIsAwesome')
+        self.assertIn(b'ERROR! Incorrect login credentials.', response.data)
+
+    def test_valid_logout(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('vinleclair', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.app.get('/login', follow_redirects=True)
+        self.login('vinleclair', 'FlaskIsAwesome')
+        response = self.app.get('/logout', follow_redirects=True)
+        self.assertIn(b'Goodbye!', response.data)
+
+    def test_invalid_logout_within_being_logged_in(self):
+        response = self.app.get('/logout', follow_redirects=True)
+        self.assertIn(b'Log In', response.data)
+
 
 if __name__ == "__main__":
     unittest.main()

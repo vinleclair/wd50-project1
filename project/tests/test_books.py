@@ -33,11 +33,8 @@ class ProjectTests(unittest.TestCase):
     def test_main_page(self):
         response = self.app.get('/', follow_redirects=True)
         self.assertIn(b'Book Reviews', response.data)
-        self.assertIn(b'Search', response.data)
-        self.assertIn(b'Books', response.data)
-        self.assertIn(b'Book Reviews', response.data)
-        self.assertIn(b'Goodreads', response.data)
-        self.assertIn(b'Add Book', response.data)
+        self.assertIn(b'Register', response.data)
+        self.assertIn(b'Log In', response.data)
 
     def test_main_page_query_results(self):
         response = self.app.get('/add', follow_redirects=True)

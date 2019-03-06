@@ -32,15 +32,21 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="books-navbar-collapse-1">
           <ul class="nav navbar-nav">
-            <li><a href="#">Search</a></li>
-            <li><a href="#">Books</a></li>
-            <li><a href="#">Book Reviews</a></li>
-            <li><a href="#">Goodreads</a></li>
+            {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('books.index') }}">Booklist</a></li>
             <li><a href="{{ url_for('books.add_book') }}">Add Book</a></li>
+            <li><a href="{{ url_for('users.logout') }}">Log Out</a></li>
+            {% else %}
             <li><a href="{{ url_for('users.register') }}">Register</a></li>
-          </ul>
+            <li><a href="{{ url_for('users.login') }}">Log In</a></li>
+            {% endif %}
+          </ul> 
           <ul class="nav navbar-nav navbar-right">
+            {% if current_user.is_authenticated %}
+            <li><a href="#">Welcome, {{current_user.username}}!</a></li>
+            {% else %}
             <li><a href="#">Welcome!</a></li>
+            {% endif %}
           </ul>
         </div><!--/.nav-collapse -->
       </div><!-- /.container -->
