@@ -5,7 +5,7 @@ from project.models import Book
 from .forms import AddBookForm
 
 # config
-books_blueprint = Blueprint('books', __name__, template_folder='templates')
+books_blueprint = Blueprint('books', __name__)
 
 # helper functions
 def flash_errors(form):
