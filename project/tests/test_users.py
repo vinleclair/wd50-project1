@@ -2,7 +2,7 @@ import os
 import unittest
 import re
 
-from project import app, db
+from project import app, db, mail
 
 
 TEST_DB = 'user.db'
@@ -22,6 +22,7 @@ class UsersTests(unittest.TestCase):
         self.app = app.test_client()
         db.create_all()
 
+        mail.init_app(app)
         self.assertEquals(app.debug, False)
 
     # executed after each test
@@ -43,12 +44,6 @@ class UsersTests(unittest.TestCase):
                 follow_redirects=True)
 
     # tests
-    def test_main_page(self):
-        response = self.app.get('/', follow_redirects=True)
-        self.assertIn(b'Book Reviews', response.data)
-        self.assertIn(b'Register', response.data)
-        self.assertIn(b'Log In', response.data)
-
     def test_user_registration_form_displays(self):
         response = self.app.get('/register')
         self.assertEqual(response.status_code, 200)
