@@ -51,19 +51,19 @@ class UsersTests(unittest.TestCase):
 
     def test_valid_user_registration(self):
         self.app.get('/register', follow_redirects=True)
-        response = self.register('vinleclair@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        response = self.register('patkennedy79@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
         self.assertIn(b'Thanks for registering!', response.data)
 
     def test_duplicate_email_user_registration_error(self):
         self.app.get('/register', follow_redirects=True)
-        self.register('vinleclair@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.register('patkennedy79@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
         self.app.get('/register', follow_redirects=True)
-        response = self.register('vinleclair@gmail.com', 'FlaskIsReallyAwesome', 'FlaskIsReallyAwesome')
-        self.assertIn(b'ERROR! Username (vinleclair@gmail.com) already exists.', response.data)
+        response = self.register('patkennedy79@gmail.com', 'FlaskIsReallyAwesome', 'FlaskIsReallyAwesome')
+        self.assertIn(b'ERROR! Username (patkennedy79@gmail.com) already exists.', response.data)
 
     def test_missing_field_user_registration_error(self):
         self.app.get('/register', follow_redirects=True)
-        response = self.register('vinleclair@gmail.com', 'FlaskIsAwesome', '')
+        response = self.register('patkennedy79@gmail.com', 'FlaskIsAwesome', '')
         self.assertIn(b'This field is required.', response.data)
 
     def test_login_form_displays(self):
@@ -73,21 +73,21 @@ class UsersTests(unittest.TestCase):
 
     def test_valid_login(self):
         self.app.get('/register', follow_redirects=True)
-        self.register('vinleclair@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.register('patkennedy79@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
         self.app.get('/login', follow_redirects=True)
-        response = self.login('vinleclair@gmail.com', 'FlaskIsAwesome')
-        self.assertIn(b'vinleclair@gmail.com', response.data)
+        response = self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
+        self.assertIn(b'patkennedy79@gmail.com', response.data)
 
     def test_login_without_registering(self):
         self.app.get('/login', follow_redirects=True)
-        response = self.login('vinleclair@gmail.com', 'FlaskIsAwesome')
+        response = self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
         self.assertIn(b'ERROR! Incorrect login credentials.', response.data)
 
     def test_valid_logout(self):
         self.app.get('/register', follow_redirects=True)
-        self.register('vinleclair@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.register('patkennedy79@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
         self.app.get('/login', follow_redirects=True)
-        self.login('vinleclair@gmail.com', 'FlaskIsAwesome')
+        self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
         response = self.app.get('/logout', follow_redirects=True)
         self.assertIn(b'Goodbye!', response.data)
 
@@ -122,6 +122,43 @@ class UsersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn(b'You should be redirected automatically to target URL:', response.data)
         self.assertIn(b'/login?next=%2Fuser_profile', response.data)
+
+    def test_change_email_address_page(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        response = self.app.get('/email_change')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Current Email: patkennedy79@gmail.com', response.data)
+        self.assertIn(b'Enter New Email Address', response.data)
+
+    def test_change_email_address(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.app.post('/email_change', data=dict(email='patkennedy79@blaa.com'), follow_redirects=True)
+        response = self.app.get('/user_profile')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Email Address', response.data)
+        self.assertIn(b'patkennedy79@blaa.com', response.data)
+        self.assertNotIn(b'patkennedy79@gmail.com', response.data)
+
+    def test_change_email_address_with_existing_email(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        response = self.app.post('/email_change', data=dict(email='patkennedy79@gmail.com'), follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Sorry, that email already exists!', response.data)
+        self.assertIn(b'Current Email: patkennedy79@gmail.com', response.data)
+        self.assertIn(b'Enter New Email Address', response.data)
+
+    def test_change_email_without_logging_in(self):
+        response = self.app.get('/email_change')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(b'You should be redirected automatically to target URL:', response.data)
+        self.assertIn(b'/login?next=%2Femail_change', response.data)
+        response = self.app.post('/email_change', data=dict(email='patkennedy79@gmail.com'), follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Log In', response.data)
+        self.assertIn(b'Need an account?', response.data)
 
 if __name__ == "__main__":
     unittest.main()
