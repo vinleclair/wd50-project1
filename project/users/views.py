@@ -105,6 +105,17 @@ def confirm_email(token):
 
     return redirect(url_for('books.index'))
 
+@users_blueprint.route('/resend_confirmation')
+@login_required
+def resend_email_confirmation():
+    try:
+        send_confirmation_email(current_user.email)
+        flash('Email sent to confirm your email address. Please check your email!', 'success')
+    except IntegrityError:
+        flash('Error! Unable to send email to confirm your email address.', 'error')
+
+    return redirect(url_for('users.profile'))
+
 @users_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm(request.form)
