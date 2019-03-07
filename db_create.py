@@ -13,9 +13,11 @@ db.create_all()
 import_books()
 
 # insert user data
+admin_user = User(email='vinleclair@gmail.com', plaintext_password='limeman', role='admin')
 user1 = User('hibou@yahoo.com', 'password1234')
 user2 = User('spameggsham@gmail.com', 'PaSsWoRd')
 user3 = User('blaa@blaa.com', 'MyFavPassword')
+db.session.add(admin_user)
 db.session.add(user1)
 db.session.add(user2)
 db.session.add(user3)

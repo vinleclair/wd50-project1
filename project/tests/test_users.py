@@ -3,7 +3,7 @@ import unittest
 import re
 
 from project import app, db, mail
-
+from project.models import User
 
 TEST_DB = 'user.db'
 
@@ -42,6 +42,11 @@ class UsersTests(unittest.TestCase):
                 '/login',
                 data=dict(email=email, password=password),
                 follow_redirects=True)
+
+    def create_admin_user(self):
+        new_user = User(email='admin@bookreviews.com', plaintext_password='AdMiNpAsSwOrD', role='admin')
+        db.session.add(new_user)
+        db.session.commit()
 
     # tests
     def test_user_registration_form_displays(self):
@@ -184,6 +189,31 @@ class UsersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Log In', response.data)
         self.assertIn(b'Need an account?', response.data)
+
+    def test_admin_site_valid_access(self):
+        self.create_admin_user()
+        self.app.get('/login', follow_redirects=True)
+        response = self.login('admin@bookreviews.com', 'AdMiNpAsSwOrD')
+        self.assertIn(b'admin@bookreviews.com', response.data)
+        self.assertIn(b'View Users (Admin)', response.data)
+        response = self.app.get('/admin_view_users')
+        self.assertIn(b'Administrative Page: List of Users', response.data)
+
+    def test_admin_site_invalid_access(self):
+        response = self.app.get('/admin_view_users')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(b'You should be redirected automatically to target URL:', response.data)
+        self.assertIn(b'/login?next=%2Fadmin_view_users', response.data)
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.app.get('/login', follow_redirects=True)
+        response = self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
+        self.assertIn(b'patkennedy79@gmail.com', response.data)
+        self.assertNotIn(b'View Users (Admin)', response.data)
+        response = self.app.get('/admin_view_users')
+        self.assertEqual(response.status_code, 403)
+        self.assertIn(b'Forbidden', response.data)
+        self.assertIn(b'You don\'t have the permission to access the requested resource. It is either read-protected or not readable by the server.', response.data)
 
 if __name__ == "__main__":
     unittest.main()

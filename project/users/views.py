@@ -1,5 +1,5 @@
 # imports
-from flask import render_template, Blueprint, request, redirect, url_for, flash
+from flask import render_template, Blueprint, request, redirect, url_for, flash, abort
 from sqlalchemy.exc import IntegrityError
 from flask_login import login_user, current_user, login_required, logout_user
 from flask_mail import Message
@@ -195,6 +195,16 @@ def reset_with_token(token):
 @login_required
 def user_profile():
     return render_template('user_profile.html')
+
+@users_blueprint.route('/admin_view_users')
+@login_required
+def admin_view_users():
+    if current_user.role != 'admin':
+        abort(403)
+    else:
+        users = User.query.order_by(User.user_id).all()
+        return render_template('admin_view_users.html', users=users)
+    return redirect(url_for('stocks.watch_list'))
 
 @users_blueprint.route('/email_change', methods=["GET", "POST"])
 @login_required
