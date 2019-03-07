@@ -65,7 +65,7 @@ class UsersTests(unittest.TestCase):
         self.app.get('/register', follow_redirects=True)
         response = self.register('vinleclair@gmail.com', 'FlaskIsAwesome', '')
         self.assertIn(b'This field is required.', response.data)
- 
+
     def test_login_form_displays(self):
         response = self.app.get('/login')
         self.assertEqual(response.status_code, 200)
@@ -76,7 +76,7 @@ class UsersTests(unittest.TestCase):
         self.register('vinleclair@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
         self.app.get('/login', follow_redirects=True)
         response = self.login('vinleclair@gmail.com', 'FlaskIsAwesome')
-        self.assertIn(b'Welcome, vinleclair@gmail.com!', response.data)
+        self.assertIn(b'vinleclair@gmail.com', response.data)
 
     def test_login_without_registering(self):
         self.app.get('/login', follow_redirects=True)
@@ -95,6 +95,33 @@ class UsersTests(unittest.TestCase):
         response = self.app.get('/logout', follow_redirects=True)
         self.assertIn(b'Log In', response.data)
 
+    def test_user_profile_page(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        response = self.app.get('/user_profile')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Email Address', response.data)
+        self.assertIn(b'Account Actions', response.data)
+        self.assertIn(b'Statistics', response.data)
+        self.assertIn(b'First time logged in. Welcome!', response.data)
+
+    def test_user_profile_page_after_logging_in(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.app.get('/logout', follow_redirects=True)
+        self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
+        response = self.app.get('/user_profile')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Email Address', response.data)
+        self.assertIn(b'Account Actions', response.data)
+        self.assertIn(b'Statistics', response.data)
+        self.assertIn(b'Last Logged In: ', response.data)
+
+    def test_user_profile_without_logging_in(self):
+        response = self.app.get('/user_profile')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(b'You should be redirected automatically to target URL:', response.data)
+        self.assertIn(b'/login?next=%2Fuser_profile', response.data)
 
 if __name__ == "__main__":
     unittest.main()

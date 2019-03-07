@@ -74,10 +74,9 @@ def register():
                 new_user.authenticated = True
                 db.session.add(new_user)
                 db.session.commit()
-
+                login_user(new_user)
                 send_confirmation_email(new_user.email)
                 flash('Thanks for registering!  Please check your email to confirm your email address.', 'success')
-                login_user(new_user)
                 return redirect(url_for('books.index'))
             except IntegrityError:
                 db.session.rollback()
@@ -114,6 +113,8 @@ def login():
             user = User.query.filter_by(email=form.email.data).first()
             if user is not None and user.is_correct_password(form.password.data):
                 user.authenticated = True
+                user.last_logged_in = user.current_logged_in
+                user.current_logged_in = datetime.now()
                 db.session.add(user)
                 db.session.commit()
                 login_user(user)
@@ -178,3 +179,8 @@ def reset_with_token(token):
         return redirect(url_for('users.login'))
 
     return render_template('reset_password_with_token.html', form=form, token=token)
+
+@users_blueprint.route('/user_profile')
+@login_required
+def user_profile():
+    return render_template('user_profile.html')
