@@ -28,13 +28,48 @@ class ProjectTests(unittest.TestCase):
         db.session.remove()
         db.drop_all()
 
+	# helper functions
+    def register(self, email, password, confirm):
+        return self.app.post(
+            '/register',
+            data=dict(email=email, password=password, confirm=confirm),
+            follow_redirects=True
+        )
 
-    # tests
+    def login(self, email, password):
+        return self.app.post(
+            '/login',
+            data=dict(email=email, password=password),
+            follow_redirects=True
+        )
+
+    def register_user(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'FlaskIsAwesome', 'FlaskIsAwesome')
+
+    def login_user(self):
+        self.app.get('/login', follow_redirects=True)
+        self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
+
+    def logout_user(self):
+        self.app.get('/logout', follow_redirects=True)
+
+    # test
     def test_main_page(self):
+        self.register_user()
+        self.logout_user()
         response = self.app.get('/', follow_redirects=True)
-        self.assertIn(b'Book Reviews', response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Book Reviews App', response.data)
+        self.assertIn(b'Books', response.data)
         self.assertIn(b'Register', response.data)
         self.assertIn(b'Log In', response.data)
+
+    def test_add_book_page(self):
+        self.register_user()
+        response = self.app.get('/add', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Add a New Book', response.data)
 
     def test_main_page_query_results(self):
         response = self.app.get('/add', follow_redirects=True)

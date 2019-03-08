@@ -1,6 +1,6 @@
 from books import import_books
 from project import db
-from project.models import Book, User
+from project.models import Book, User, Review
 
 
 # drop all of the existing database tables
@@ -22,5 +22,9 @@ db.session.add(user1)
 db.session.add(user2)
 db.session.add(user3)
 
-# commit the changes for the recipes
+# insert review data
+review1 = Review(2, 4, 4, 'good book')
+db.session.add(review1)
+
+# commit the changes
 db.session.commit()

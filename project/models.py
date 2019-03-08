@@ -1,4 +1,5 @@
 from project import db, bcrypt
+from sqlalchemy import CheckConstraint, PrimaryKeyConstraint
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 from datetime import datetime
 
@@ -11,6 +12,7 @@ class Book(db.Model):
     title = db.Column(db.String, nullable=False)
     author = db.Column(db.String, nullable=False)
     year = db.Column(db.Integer, nullable=False)
+    reviews = db.relationship('Review', backref='book', lazy='dynamic')
 
     def __init__(self, isbn, title, author, year):
         self.isbn = isbn
@@ -37,6 +39,7 @@ class User(db.Model):
     last_logged_in = db.Column(db.DateTime, nullable=True)
     current_logged_in = db.Column(db.DateTime, nullable=True)
     role = db.Column(db.String, default='user')
+    reviews = db.relationship('Review', backref='user', lazy='dynamic')
 
     def __init__(self, email, plaintext_password, email_confirmation_sent_on=None, role='user'):
         self.email = email
@@ -84,3 +87,19 @@ class User(db.Model):
 
     def __repr__(self):
         return '<User {0}>'.format(self.name)
+
+class Review(db.Model):
+
+    __tablename__ = "reviews"
+    #__table_args__ = (PrimaryKeyConstraint(user_id, book_id), {})
+
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), primary_key=True)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.book_id'), primary_key=True)
+    rating = db.Column(db.Integer, CheckConstraint('rating >= 1 and rating <= 5'), nullable=False)
+    text = db.Column(db.String, nullable=True)
+
+    def __init__(self, user_id, book_id, rating, text):
+        self.user_id = user_id
+        self.book_id = book_id
+        self.rating = rating
+        self.text = text
