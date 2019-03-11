@@ -1,6 +1,7 @@
 from books import import_books
 from project import db
 from project.models import Book, User, Review
+from datetime import datetime
 
 
 # drop all of the existing database tables

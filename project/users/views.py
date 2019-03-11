@@ -114,7 +114,7 @@ def resend_email_confirmation():
     except IntegrityError:
         flash('Error! Unable to send email to confirm your email address.', 'error')
 
-    return redirect(url_for('users.profile'))
+    return redirect(url_for('users.user_profile'))
 
 @users_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
