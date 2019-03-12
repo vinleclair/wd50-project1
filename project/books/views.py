@@ -1,12 +1,14 @@
 # imports
 from flask import render_template, Blueprint, request, redirect, url_for, flash
-from flask_login import login_required
-from project import db
-from project.models import Book, Review, User
-from .forms import AddBookForm, BookSearchForm
+from flask_login import login_required, current_user
 from sqlalchemy import and_
 from sqlalchemy.sql.expression import case
+from sqlalchemy.exc import IntegrityError
+from datetime import datetime
 
+from project import db
+from project.models import Book, Review, User
+from .forms import AddBookForm, BookSearchForm, ReviewBookForm
 # config
 books_blueprint = Blueprint('books', __name__)
 
@@ -26,6 +28,7 @@ def index():
     return render_template('books.html', books=all_books)
 
 @books_blueprint.route('/add', methods=['GET', 'POST'])
+@login_required
 def add_book():
     form = AddBookForm(request.form)
     if request.method == 'POST':
@@ -76,16 +79,33 @@ def search_results(search):
 @books_blueprint.route('/book/<book_id>')
 @login_required
 def book_details(book_id):
+    form = ReviewBookForm(request.form)
     book = db.session.query(Book)\
             .filter(Book.book_id == book_id)\
             .first()
-    review = db.session.query(Review, User)\
+    reviews = db.session.query(Review, User)\
             .outerjoin(User)\
             .filter(Review.book_id == book_id)\
             .filter(Review.user_id == User.user_id)\
             .all()
     if book is not None:
-        return render_template('book_details.html', book=book, review=review)
+        return render_template('book_details.html', book=book, reviews=reviews, form=form)
     else:
         flash('Error! Book does not exist.', 'error')
     return redirect(url_for('books.index'))
+
+@books_blueprint.route('/book/<book_id>', methods=['GET', 'POST'])
+@login_required
+def review_book(book_id):
+    rating = request.form['rating']
+    text = request.form['text']
+    if request.method == 'POST':
+        try:
+            new_review = Review(current_user.user_id, book_id, rating, text, datetime.now())
+            db.session.add(new_review)
+            db.session.commit()
+            flash('Review added!', 'success')
+        except IntegrityError:
+            flash('You already reviewed this book!', 'error')
+        return redirect(url_for('books.book_details', book_id=book_id))
+

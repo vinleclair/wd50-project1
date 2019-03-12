@@ -22,10 +22,13 @@ db.session.add(admin_user)
 db.session.add(user1)
 db.session.add(user2)
 db.session.add(user3)
+print("User Import Successful")
 
 # insert review data
-review1 = Review(2, 4, 4, 'good book')
+review1 = Review(2, 4, 4, 'good book', datetime.now().date())
 db.session.add(review1)
+print("Review Import Sucessful")
 
 # commit the changes
 db.session.commit()
+print("Database Inilization Complete")

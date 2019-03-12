@@ -96,9 +96,11 @@ class Review(db.Model):
     book_id = db.Column(db.Integer, db.ForeignKey('books.book_id'), primary_key=True)
     rating = db.Column(db.Integer, CheckConstraint('rating >= 1 and rating <= 5'), nullable=False)
     text = db.Column(db.String, nullable=True)
+    date = db.Column(db.Date, nullable=False)
 
-    def __init__(self, user_id, book_id, rating, text):
+    def __init__(self, user_id, book_id, rating, text, date):
         self.user_id = user_id
         self.book_id = book_id
         self.rating = rating
         self.text = text
+        self.date = date

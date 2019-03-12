@@ -1,4 +1,6 @@
 {% extends "layout.html" %}
+{% from "_form_macros.html" import render_field %}
+
 {% block content %}
  
 <div class="user-profile">
@@ -21,16 +23,26 @@
       <div class="panel-heading">ISBN</div>
       <div class="panel-body">{{ book.isbn }}</div>
     </div>
-
+    
     {% if review is not none %}
-    {% for r in review %}
+    {% for review in reviews %}
     <div class="panel panel-primary">
-      <div class="panel-heading">Review {{ r.Review.rating }} out of 5 stars by {{ r.User.email }}</div>
-      <div class="panel-body">{{ r.Review.text }}</div>
+      <div class="panel-heading">{{review.User.email}}: {{ review.Review.rating }}/5
+        <span class="pull-right">{{ review.Review.date }}</span>
+      </div>
+      <div class="panel-body">{{ review.Review.text }}</div>
     </div>
     {% endfor %}
     {% endif %}
-
+    
+    <form action="{{ url_for('books.review_book', book_id = book.book_id) }}" method="post">
+      {{ form.csrf_token }}
+      <dl>
+        {{ render_field(form.rating, placeholder="Type") }}
+        {{ render_field(form.text, placeholer="Value") }}
+      </dl>
+      <button class="btn btn-sm btn-success" type="submit">Review Book</button>
+    </form>
   </div>
 </div>
  
