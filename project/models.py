@@ -21,7 +21,7 @@ class Book(db.Model):
         self.year = year
 
     def __repr__(self):
-        return '<title {}'.format(self.name)
+        return '<title {}>'.format(self.title)
 
 
 class User(db.Model):

@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField
+from wtforms import StringField, SelectField
 from wtforms.validators import DataRequired
 
 
@@ -8,3 +8,12 @@ class AddBookForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     author = StringField('Author', validators=[DataRequired()])
     year = StringField('Year', validators=[DataRequired()])
+
+class BookSearchForm(FlaskForm):
+    choices = [('ISBN', 'ISBN'),
+               ('Title', 'Title'),
+               ('Author', 'Author'),
+               ('Year', 'Year')]
+    select = SelectField('Search for', choices=choices)
+    search = StringField('Value', validators=[DataRequired()])
+

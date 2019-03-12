@@ -3,7 +3,7 @@ from flask import render_template, Blueprint, request, redirect, url_for, flash
 from flask_login import login_required
 from project import db
 from project.models import Book, Review, User
-from .forms import AddBookForm
+from .forms import AddBookForm, BookSearchForm
 from sqlalchemy import and_
 from sqlalchemy.sql.expression import case
 
@@ -40,6 +40,38 @@ def add_book():
             flash('ERROR! Book was not added.', 'error')
 
     return render_template('add_book.html',form=form)
+
+@books_blueprint.route('/search', methods=['GET', 'POST'])
+@login_required
+def search_book():
+    search = BookSearchForm(request.form)
+    if request.method == 'POST':
+        return search_results(search)
+    return render_template('search_book.html', form=search)
+
+@books_blueprint.route('/results')
+@login_required
+def search_results(search):
+    results = []
+    search_string = search.data['search']
+
+    if search_string:
+        if search.data['select'] == 'ISBN':
+            search_query = db.session.query(Book).filter(Book.isbn.contains(search_string))
+        elif search.data['select'] == 'Title':
+            search_query = db.session.query(Book).filter(Book.title.contains(search_string))
+        elif search.data['select'] == 'Author':
+            search_query = db.session.query(Book).filter(Book.author.contains(search_string))
+        elif search.data['select'] == 'Year':
+            search_query = db.session.query(Book).filter(Book.year == search_string)
+
+    results = search_query.all()
+    if not results:
+        flash('No results found!', 'error')
+        return redirect('/search')
+    else:
+        print(results)
+        return render_template('books.html', books=results)
 
 @books_blueprint.route('/book/<book_id>')
 @login_required
