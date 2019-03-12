@@ -2,7 +2,7 @@ import os
 import unittest
 
 from project import app, db
-
+from project.models import Book
 
 TEST_DB = 'test.db'
 
@@ -54,6 +54,17 @@ class ProjectTests(unittest.TestCase):
     def logout_user(self):
         self.app.get('/logout', follow_redirects=True)
 
+    def add_books(self):
+        book1 = Book('0380795272', 'Krondor: The Betrayal', 'Raymond E. Feist', '1998')
+        book2 = Book('1416949658', 'The Dark Is Rising', 'Susan Cooper', '1973')
+        book3 = Book('1857231082', 'The Black Unicorn.', 'Terry Brooks', '1987')
+        book4 = Book('0553803700', 'I, Robot', 'Isaac Asimov', '1950')
+        db.session.add(book1)
+        db.session.add(book2)
+        db.session.add(book3)
+        db.session.add(book4)
+        db.session.commit()
+
     # test
     def test_main_page(self):
         self.register_user()
@@ -95,6 +106,16 @@ class ProjectTests(unittest.TestCase):
             follow_redirects=True)
         self.assertIn(b'ERROR! Book was not added.', response.data)
         self.assertIn(b'This field is required.', response.data)
+
+    def test_book_details(self):
+        self.register_user()
+        self.add_books()
+        response = self.app.get('/book/1', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Krondor: The Betrayal', response.data)
+        self.assertIn(b'Raymond E. Feist', response.data)
+        self.assertIn(b'1998', response.data)
+        self.assertIn(b'0380795272', response.data)
 
 if __name__ == "__main__":
     unittest.main()

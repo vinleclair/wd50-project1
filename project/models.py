@@ -91,7 +91,6 @@ class User(db.Model):
 class Review(db.Model):
 
     __tablename__ = "reviews"
-    #__table_args__ = (PrimaryKeyConstraint(user_id, book_id), {})
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), primary_key=True)
     book_id = db.Column(db.Integer, db.ForeignKey('books.book_id'), primary_key=True)
