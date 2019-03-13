@@ -71,7 +71,7 @@ class ProjectTests(unittest.TestCase):
         self.logout_user()
         response = self.app.get('/', follow_redirects=True)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Book Reviews App', response.data)
+        self.assertIn(b'Book Reviews', response.data)
         self.assertIn(b'Books', response.data)
         self.assertIn(b'Register', response.data)
         self.assertIn(b'Log In', response.data)

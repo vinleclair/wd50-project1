@@ -32,7 +32,6 @@ def index():
     return render_template('books.html', books=all_books)
 
 @books_blueprint.route('/add', methods=['GET', 'POST'])
-@login_required
 def add_book():
     form = AddBookForm(request.form)
     if request.method == 'POST':
