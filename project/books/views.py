@@ -1,14 +1,16 @@
 # imports
-from flask import render_template, Blueprint, request, redirect, url_for, flash
+from flask import render_template, Blueprint, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from sqlalchemy import and_
 from sqlalchemy.sql.expression import case
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql import func
 from datetime import datetime
 
 from project import db
 from project.models import Book, Review, User
 from .forms import AddBookForm, BookSearchForm, ReviewBookForm
+
 # config
 books_blueprint = Blueprint('books', __name__)
 
@@ -109,3 +111,22 @@ def review_book(book_id):
             flash('You already reviewed this book!', 'error')
         return redirect(url_for('books.book_details', book_id=book_id))
 
+@books_blueprint.route("/api/<isbn>", methods=['GET'])
+def book_api(isbn):
+    if request.method == 'GET':
+        book = db.session.query(Book).filter(Book.isbn == isbn).first()
+        if book is None:
+            return jsonify({"error": "Invalid isbn"}), 404
+
+        reviews = db.session.query(func.count(Review.rating).label('count'), func.avg(Review.rating).label('average'))\
+                .filter(Review.book_id == book.book_id)\
+                .all()
+
+        return jsonify({
+                "title": book.title,
+                "author": book.author,
+                "year": book.year,
+                "isbn": book.isbn,
+                "review_count": reviews[0][0],
+                "average_score": round(reviews[0][1], 1)
+            })

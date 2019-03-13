@@ -38,8 +38,16 @@
     <form action="{{ url_for('books.review_book', book_id = book.book_id) }}" method="post">
       {{ form.csrf_token }}
       <dl>
-        {{ render_field(form.rating, placeholder="Type") }}
-        {{ render_field(form.text, placeholer="Value") }}
+        <h4> Review: </h4>
+        {% for button in form.rating %}
+        <tr>
+          <td>{{ button }}</td>
+        </tr>
+        <tr>
+          <td>{{ button.label}}</td>
+        </tr>
+        {% endfor %}
+        {{ form.text }}
       </dl>
       <button class="btn btn-sm btn-success" type="submit">Review Book</button>
     </form>

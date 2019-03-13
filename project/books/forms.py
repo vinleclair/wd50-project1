@@ -19,5 +19,5 @@ class BookSearchForm(FlaskForm):
 
 class ReviewBookForm(FlaskForm):
     rating = RadioField('Rating', choices=[('1','1'),('2','2'),('3','3'),('4','4'),('5','5')])
-    text = StringField('Text')
+    text = StringField('Text', render_kw={"placeholder": "Comments"})
 
