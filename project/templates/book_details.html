@@ -23,6 +23,13 @@
       <div class="panel-heading">ISBN</div>
       <div class="panel-body">{{ book.isbn }}</div>
     </div>
+
+    {% if goodreads is not none %}
+    <div class="panel panel-primary">
+      <div class="panel-heading">Goodreads</div>
+      <div class="panel-body">Average {{ goodreads['books'][0]['average_rating'] }} with {{ goodreads['books'][0]['ratings_count'] }} ratings</div>
+    </div>
+    {% endif %}
     
     {% if review is not none %}
     {% for review in reviews %}

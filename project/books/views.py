@@ -6,6 +6,8 @@ from sqlalchemy.sql.expression import case
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import func
 from datetime import datetime
+import requests
+import json
 
 from project import db
 from project.models import Book, Review, User
@@ -90,8 +92,11 @@ def book_details(book_id):
             .filter(Review.book_id == book_id)\
             .filter(Review.user_id == User.user_id)\
             .all()
+
+    goodreads = requests.get("https://www.goodreads.com/book/review_counts.json", params={'key': '53MbEMReRV6qWUw7IDg', "isbns": book.isbn}).json()
+
     if book is not None:
-        return render_template('book_details.html', book=book, reviews=reviews, form=form)
+        return render_template('book_details.html', book=book, reviews=reviews, form=form, goodreads=goodreads)
     else:
         flash('Error! Book does not exist.', 'error')
     return redirect(url_for('books.index'))
